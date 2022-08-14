@@ -1,3 +1,7 @@
-from bitfield import binary
+from bitarray import bitarray
 
-print(B(10))
+jogadores_BA = [bitarray('00'), bitarray('01'), bitarray('10'), bitarray('11')]
+print(jogadores_BA[0])
+a = bitarray('00')
+b = bitarray('10')
+print(a | b)

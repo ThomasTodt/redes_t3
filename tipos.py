@@ -1,9 +1,7 @@
-from bitfield import binary
+from bitarray import bitarray
 
-ERRO = Binary(000)
-INICIA = Binary(001)
-RESULTADO = Binary(010)
-FINALIZA = Binary(011)
-BASTAO = Binary(110)
-
-
+ERRO      = bitarray('0000')
+INICIA    = bitarray('0001')
+RESULTADO = bitarray('0010')
+FINALIZA  = bitarray('0011')
+BASTAO    = bitarray('0100')
