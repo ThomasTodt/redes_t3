@@ -13,7 +13,12 @@ DADOS NOS TIPOS DE MENSAGEM:
         lixo: 8
 
     INICIA:
-        jogador eu vai jogar por enquanto: 2
+        jogador que vai jogar por enquanto: 2
+        combinação que vai tentar: 3
+        custo a ser pago: 3
+
+    JOGA:
+        jogador que vai jogar por enquanto: 2
         combinação que vai tentar: 3
         custo a ser pago: 3
 
@@ -25,7 +30,7 @@ DADOS NOS TIPOS DE MENSAGEM:
     FINALIZA:
         resultado: 1
         mudanca: 4
-        jogador: 2 (o jogado a ter o saldo atualizado)
+        jogador: 2 (o jogador a ter o saldo atualizado)
         lixo: 1
 
     BASTAO:
