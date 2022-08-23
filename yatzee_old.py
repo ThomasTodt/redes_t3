@@ -199,12 +199,13 @@ while True:
                 pontos = int2ba(pontos_comb(comb), length=4)
                 input()
                 print(f"Voce ganhou {pontos} pontos")
-                dados =  ganhei + pontos
+                dados =  ganhei + pontos + jogadores_BA[eu]
                 msg = msg(eu, prox, RESULTADO, dados)
 
         elif(msg.tipo == RESULTADO):
             if eu == jogador_inicial:
                 msg.dados[5:7] = int2ba(eu, length=2) # FINALIZA tem os bytes iniciais igual a RESULTADO
+                
             else:
                 msg.prox = prox # nao precisa
 

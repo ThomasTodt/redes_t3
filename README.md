@@ -25,7 +25,8 @@ DADOS NOS TIPOS DE MENSAGEM:
     RESULTADO: 
         resultado: 1
         mudanca no saldo: 4 (o maximo eh ganhar 15 no quinteto; o sinal eh indicado pelo resultado)
-        lixo: 3
+        jogador: 2 (quem jogou)
+        lixo: 1
 
     FINALIZA:
         resultado: 1
@@ -34,4 +35,7 @@ DADOS NOS TIPOS DE MENSAGEM:
         lixo: 1
 
     BASTAO:
+        lixo: 8
+
+    RECOMECA:
         lixo: 8

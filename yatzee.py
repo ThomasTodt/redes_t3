@@ -81,7 +81,6 @@ bst: Mensagem(eu, prox, BASTAO) # bastao
 
 jogador_inicial = 0
 rodada = 0
-bastao = False
 
 # Pergunta ao usuário qual combinação deseja
 # Retorna bitarray da combinação escolhida
@@ -116,7 +115,6 @@ if eu == jogador_inicial:
 
     msg.send_msg()
     bst.send_msg()
-    bastao = False
 
 
 while True:
@@ -124,19 +122,19 @@ while True:
     if buf.recv_msg() == -1: # nao era uma mensagem com o nosso marcador de inicio
         continue
 
-    if msg.paridade != msg.calc_paridade():
+    if buf.paridade != buf.calc_paridade():
         # print(f"ERRO PARIDADE: {msg.paridade} vs {msg.calc_paridade()}")
         anterior = (eu + 3) % 4
         msg = Mensagem(eu, anterior, ERRO)
 
-    elif msg.tipo == ERRO:
-        if msg.dst != jogadores_BA[eu]:
+    elif buf.tipo == ERRO:
+        if buf.dst != jogadores_BA[eu]:
             msg = buf # se não for o destinatário repassa a mensagem lida adiante
 
-    elif msg.tipo == INICIA:
-        apostador = ba2int(msg.dados[0:2])
-        comb = msg.dados[2:5]
-        custo = ba2int(msg.dados[5:8])
+    elif buf.tipo == INICIA:
+        apostador = ba2int(buf.dados[0:2])
+        comb = buf.dados[2:5]
+        custo = ba2int(buf.dados[5:8])
 
         if eu != jogador_inicial:
             if(aumentar_aposta()):
@@ -147,3 +145,54 @@ while True:
         custo = int2ba(custo, length=3)
         dados = jogadores_BA[apostador] + comb + custo
         msg = Mensagem(eu, prox, INICIA, dados)
+        
+    elif buf.tipo == JOGA:
+        if buf.dst != jogadores_BA[eu]:
+            msg = buf
+
+        else:
+            comb = buf.dados[2:5]
+            
+            dadinhos = jogar_dadinhos()
+            ganhei = checar_comb(dadinhos, comb)
+            
+            ganhei = int2ba(int(ganhei), length=1) 
+            pontos = int2ba(calcular_pontos(comb), length=4)
+            dados =  ganhei + pontos + jogadores_BA[eu]
+            msg = Mensagem(eu, prox, RESULTADO, dados)
+            
+    elif buf.tipo == RESULTADO:
+        if eu == jogador_inicial:
+            dados = buf.dados
+            msg = Mensagem(eu, prox, FINALIZA, dados)
+        else:
+            msg = buf
+            
+    elif buf.tipo == FINALIZA:
+        afetado = ba2int(buf.dados[5:7])
+        sinal = (-1) if buf.dados[0] == 0 else 1
+        pontos = sinal * ba2int(msg.dados[1:5])
+        
+        if afetado == eu:
+            print(f"Você ganhou {pontos} pontos.")
+        else:
+            print(f"Jogador {afetado} ganhou {pontos} pontos
+        
+        if eu == jogador_inicial:
+            msg = Mensagem(eu, prox, RECOMECA)
+        else:
+            msg = buf
+
+        saldos[afetados] += pontos
+        jogador_inicial = (jogador_inicial + 1) % 4
+        rodada += 1
+        
+    elif buf.tipo == RECOMECA:
+        comb = escolher_comb()
+        custo = bitarray('001') # custo inicial
+        dados = jogadores_BA[eu] + comb + custo
+        msg = Mensagem(eu, prox, INICIA, dados)
+
+    elif buf.tipo == BASTAO:
+        msg.send_msg()
+        bst.send_msg()
