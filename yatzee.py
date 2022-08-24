@@ -196,10 +196,10 @@ def checar_comb(dadinhos, comb):
         return True if 2 in frequencias and 3 in frequencias else False
 
     elif comb == SEQ_BAIXA:
-        return True if dadinhos == [5, 4, 3, 2, 1] or dadinhos == [6, 5, 4, 3, 2] else False
+        return True if dadinhos == [1, 2, 3, 4, 5] else False
 
     elif comb == SEQ_ALTA:
-        return True if dadinhos == [1, 2, 3, 4, 5] or dadinhos == [2, 3, 4, 5, 6] else False
+        return True if dadinhos == [2, 3, 4, 5, 6] else False
 
     elif comb == QUADRA:
         return True if 4 in frequencias else False
@@ -262,9 +262,10 @@ while True:
         custo = ba2int(buf.dados[5:8])
 
         if eu != jogador_inicial:
-            if (aumentar_aposta(apostador, comb, custo)):
-                apostador = eu
-                custo += 1
+            if(saldos[eu] > custo):
+                if (aumentar_aposta(apostador, comb, custo)):
+                    apostador = eu
+                    custo += 1
 
             custo = int2ba(custo, length=3)
             dados = jogadores_BA[apostador] + comb + custo
