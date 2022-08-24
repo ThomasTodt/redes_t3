@@ -254,7 +254,7 @@ while True:
     elif buf.tipo == ERRO:
         if buf.dst != jogadores_BA[eu]:
             # se não for o destinatário repassa a mensagem lida adiante
-            msg = Mensagem(eu, ba2int(buf.dst), buf.tipo[:], buf.dados[:])
+            msg = Mensagem(eu, ba2int(buf.dst), ERRO, buf.dados[:])
 
     elif buf.tipo == INICIA:
         apostador = ba2int(buf.dados[0:2])
@@ -269,13 +269,19 @@ while True:
             custo = int2ba(custo, length=3)
             dados = jogadores_BA[apostador] + comb + custo
             msg = Mensagem(eu, prox, INICIA, dados)
+            # print(
+            #     f"[DEBUG] Jogador {eu} envia INICIA para {prox}. apostador: {msg.dados[0:2]}, comb: {msg.dados[2:5]}, custo: {msg.dados[5:8]}", file=sys.stderr)
 
         else:
-            msg = Mensagem(eu, apostador, JOGA, buf.dados)
+            msg = Mensagem(eu, apostador, JOGA, buf.dados[:])
+            # print(
+            #     f"[DEBUG] Jogador {eu} envia JOGA para {prox}. apostador: {msg.dados[0:2]}, comb: {msg.dados[2:5]}, custo: {msg.dados[5:8]}", file=sys.stderr)
 
     elif buf.tipo == JOGA:
         if buf.dst != jogadores_BA[eu]:
-            msg = Mensagem(eu, ba2int(buf.dst), buf.tipo[:], buf.dados[:])
+            msg = Mensagem(eu, ba2int(buf.dst), JOGA, buf.dados[:])
+            # print(
+            #     f"[DEBUG] Jogador {eu} envia JOGA para {prox}. apostador: {msg.dados[0:2]}, comb: {msg.dados[2:5]}, custo: {msg.dados[5:8]}", file=sys.stderr)
 
         else:
             comb = buf.dados[2:5]
@@ -289,18 +295,25 @@ while True:
             pontos = int2ba(pontos, length=4)
             dados = ganhei + pontos + jogadores_BA[eu]
             msg = Mensagem(eu, prox, RESULTADO, dados)
+            # print(
+            #     f"[DEBUG] Jogador {eu} envia RESULTADO para {prox}. sinal: {msg.dados[0]}, pontos: {msg.dados[1:5]}, afetado: {msg.dados[5:7]}", file=sys.stderr)
 
     elif buf.tipo == RESULTADO:
         if eu == jogador_inicial:
             dados = buf.dados[:]
             msg = Mensagem(eu, prox, FINALIZA, dados)
+            # print(
+            #     f"[DEBUG] Jogador {eu} envia FINALIZA para {prox}. sinal: {msg.dados[0]}, pontos: {msg.dados[1:5]}, afetado: {msg.dados[5:7]}", file=sys.stderr)
+
         else:
-            msg = Mensagem(eu, ba2int(buf.dst), buf.tipo[:], buf.dados[:])
+            msg = Mensagem(eu, ba2int(buf.dst), RESULTADO, buf.dados[:])
+            # print(
+            # f"[DEBUG] Jogador {eu} envia RESULTADO para {prox}. sinal: {msg.dados[0]}, pontos: {msg.dados[1:5]}, afetado: {msg.dados[5:7]}", file=sys.stderr)
 
     elif buf.tipo == FINALIZA:
         afetado = ba2int(buf.dados[5:7])
         sinal = (-1) if buf.dados[0] == 0 else 1
-        pontos = sinal * ba2int(msg.dados[1:5])
+        pontos = sinal * ba2int(buf.dados[1:5])
 
         if afetado == eu:
             print(f"\nVocê ganhou {pontos} pontos.")
@@ -309,8 +322,12 @@ while True:
 
         if eu == jogador_inicial:
             msg = Mensagem(eu, prox, RECOMECA)
+            # print(
+            #     f"[DEBUG] Jogador {eu} envia RECOMECA para {prox}.", file=sys.stderr)
         else:
-            msg = Mensagem(eu, ba2int(buf.dst), buf.tipo[:], buf.dados[:])
+            msg = Mensagem(eu, ba2int(buf.dst), FINALIZA, buf.dados[:])
+            # print(
+            #     f"[DEBUG] Jogador {eu} envia FINALIZA para {prox}. sinal: {msg.dados[0]}, pontos: {msg.dados[1:5]}, afetado: {msg.dados[5:7]}", file=sys.stderr)
 
         saldos[afetado] += pontos
         jogador_inicial = (jogador_inicial + 1) % 4
@@ -327,10 +344,14 @@ while True:
         custo = bitarray('001')  # custo inicial
         dados = jogadores_BA[eu] + comb + custo
         msg = Mensagem(eu, prox, INICIA, dados)
+        # print(
+        #     f"[DEBUG] Jogador {eu} envia INICIA para {prox}. eu: {jogadores_BA[eu]}, comb: {comb}, custo: {custo}", file=sys.stderr)
 
     elif buf.tipo == BASTAO:
         msg.send_msg()
         bst.send_msg()
+        # print(
+        #     f"[DEBUG] Jogador {eu} envia BASTAO para {prox}.", file=sys.stderr)
         if alguem_faliu():
             break
 
