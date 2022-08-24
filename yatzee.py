@@ -1,3 +1,5 @@
+from functools import reduce
+from nis import match
 import socket
 import sys
 from bitarray import bitarray
@@ -9,7 +11,7 @@ from combinacoes_BA import *
 ip = '127.0.0.1'
 port = 37880
 
-saldos = [0, 0, 0, 0]
+saldos = [10, 10, 10, 10]
 jogadores_BA = [bitarray('00'), bitarray('01'), bitarray('10'), bitarray('11')]
 
 eu = int(sys.argv[len(sys.argv)-1])  # numero do jogador
@@ -129,7 +131,7 @@ def jogar_dadinhos():
         1, 6), randint(1, 6), randint(1, 6)]
     fixados = []
 
-    for _ in range(0, 2):
+    for chance in range(1, 3):
 
         print(f"Você rolou {5 - len(fixados)} dados:")
         print(f"1 -> {dados[0]}")
@@ -140,7 +142,11 @@ def jogar_dadinhos():
 
         fixados = []
 
-        entrada = int(input("\nQuantos dados deseja fixar? [0-2]: "))
+        entrada = int(
+            input(f"\nQuantos dados deseja fixar? ({chance}a chance) [0-5]: "))
+
+        if entrada >= 5:
+            continue
 
         for i in range(0, entrada):
             fixado = int(
@@ -164,12 +170,65 @@ def jogar_dadinhos():
 def checar_comb(dadinhos, comb):
     # Checa se deu a combinação nos dados
     # Retorna bool
+
+    dadinhos.sort()  # util para sequencias
+
+    def count_num(num):
+        # Conta quantos dados deram o numero num
+        return reduce(lambda acc, x: acc + 1 if x == num else acc, dadinhos, 0)
+
+    # Gera mapa de frequencia dos dados
+    frequencias = {}
+    for num in range(1, 7):
+        count = count_num(num)
+        frequencias.setdefault(count, []).append(num)
+
+    if comb == UM_PAR:
+        return True if 2 in frequencias else False
+
+    elif comb == TRIO:
+        return True if 3 in frequencias else False
+
+    elif comb == DOIS_PARES:
+        return True if len(frequencias.get(2, [])) >= 2 else False
+
+    elif comb == FULL_HOUSE:
+        return True if 2 in frequencias and 3 in frequencias else False
+
+    elif comb == SEQ_BAIXA:
+        return True if dadinhos == [5, 4, 3, 2, 1] or dadinhos == [6, 5, 4, 3, 2] else False
+
+    elif comb == SEQ_ALTA:
+        return True if dadinhos == [1, 2, 3, 4, 5] or dadinhos == [2, 3, 4, 5, 6] else False
+
+    elif comb == QUADRA:
+        return True if 4 in frequencias else False
+
+    elif comb == QUINTETO:
+        return True if 5 in frequencias else False
+
     return False
 
 
 def calcular_pontos(comb):
+    comb = frozenbitarray(comb)
     # Calcula quantos pontos vale a combinação
-    return 0
+    tabela = {
+        UM_PAR: 2,
+        TRIO: 3,
+        DOIS_PARES: 4,
+        FULL_HOUSE: 5,
+        SEQ_BAIXA: 7,
+        SEQ_ALTA: 7,
+        QUADRA: 10,
+        QUINTETO: 15
+    }
+    return tabela[comb]
+
+
+def alguem_faliu():
+    # Verifica se algum jogador possui saldo <= 0
+    return reduce(lambda acc, x: x <= 0 if acc == False else True, saldos, False)
 
 
 if eu == jogador_inicial:
@@ -220,18 +279,20 @@ while True:
 
         else:
             comb = buf.dados[2:5]
+            custo = ba2int(buf.dados[5:8])
 
             dadinhos = jogar_dadinhos()
             ganhei = checar_comb(dadinhos, comb)
+            pontos = calcular_pontos(comb) if ganhei else custo
 
             ganhei = int2ba(int(ganhei), length=1)
-            pontos = int2ba(calcular_pontos(comb), length=4)
+            pontos = int2ba(pontos, length=4)
             dados = ganhei + pontos + jogadores_BA[eu]
             msg = Mensagem(eu, prox, RESULTADO, dados)
 
     elif buf.tipo == RESULTADO:
         if eu == jogador_inicial:
-            dados = buf.dados
+            dados = buf.dados[:]
             msg = Mensagem(eu, prox, FINALIZA, dados)
         else:
             msg = Mensagem(eu, ba2int(buf.dst), buf.tipo[:], buf.dados[:])
@@ -242,9 +303,9 @@ while True:
         pontos = sinal * ba2int(msg.dados[1:5])
 
         if afetado == eu:
-            print(f"Você ganhou {pontos} pontos.")
+            print(f"\nVocê ganhou {pontos} pontos.")
         else:
-            print(f"Jogador {afetado} ganhou {pontos} pontos")
+            print(f"\nJogador {afetado} ganhou {pontos} pontos")
 
         if eu == jogador_inicial:
             msg = Mensagem(eu, prox, RECOMECA)
@@ -255,11 +316,11 @@ while True:
         jogador_inicial = (jogador_inicial + 1) % 4
         rodada += 1
 
-        print("Placar atual")
-        print(f"- Jogador 1: {saldos[0]}")
-        print(f"- Jogador 2: {saldos[1]}")
-        print(f"- Jogador 3: {saldos[2]}")
-        print(f"- Jogador 4: {saldos[3]}")
+        print("\nPlacar atual")
+        print(f"- Jogador 0: {saldos[0]}")
+        print(f"- Jogador 1: {saldos[1]}")
+        print(f"- Jogador 2: {saldos[2]}")
+        print(f"- Jogador 3: {saldos[3]}")
 
     elif buf.tipo == RECOMECA:
         comb = escolher_comb()
@@ -270,3 +331,11 @@ while True:
     elif buf.tipo == BASTAO:
         msg.send_msg()
         bst.send_msg()
+        if alguem_faliu():
+            break
+
+print(f"========== Yatzee | Placar Final ==========")
+print(f"- Jogador 0: {saldos[0]}")
+print(f"- Jogador 1: {saldos[1]}")
+print(f"- Jogador 2: {saldos[2]}")
+print(f"- Jogador 3: {saldos[3]}")

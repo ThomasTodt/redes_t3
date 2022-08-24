@@ -1,10 +1,10 @@
-from bitarray import bitarray
+from bitarray import frozenbitarray
 
-UM_PAR     = bitarray('000')
-TRIO       = bitarray('001')
-DOIS_PARES = bitarray('010')
-FULL_HOUSE = bitarray('011')
-SEQ_BAIXA  = bitarray('100')
-SEQ_ALTA   = bitarray('101')
-QUADRA     = bitarray('110')
-QUINTETO   = bitarray('111')
+UM_PAR     = frozenbitarray('000')
+TRIO       = frozenbitarray('001')
+DOIS_PARES = frozenbitarray('010')
+FULL_HOUSE = frozenbitarray('011')
+SEQ_BAIXA  = frozenbitarray('100')
+SEQ_ALTA   = frozenbitarray('101')
+QUADRA     = frozenbitarray('110')
+QUINTETO   = frozenbitarray('111')

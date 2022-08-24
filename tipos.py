@@ -1,9 +1,9 @@
-from bitarray import bitarray
+from bitarray import frozenbitarray
 
-ERRO      = bitarray('0000')
-INICIA    = bitarray('0001')
-JOGA      = bitarray('0010')
-RESULTADO = bitarray('0011')
-FINALIZA  = bitarray('0100')
-RECOMECA  = bitarray('0101')
-BASTAO    = bitarray('0110')
+ERRO      = frozenbitarray('0000')
+INICIA    = frozenbitarray('0001')
+JOGA      = frozenbitarray('0010')
+RESULTADO = frozenbitarray('0011')
+FINALIZA  = frozenbitarray('0100')
+RECOMECA  = frozenbitarray('0101')
+BASTAO    = frozenbitarray('0110')
